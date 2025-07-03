@@ -1,0 +1,65 @@
+name: Develop Build and Push an Image to ECR
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "*.go"
+      - "**/*.yaml"
+
+permissions: write-all
+
+env:
+  AWS_REGION: ap-northeast-1
+  AWS_DEFAULT_REGION: ap-northeast-1
+  AWS_DEFAULT_OUTPUT: json
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+  CONTAINER_IMAGE: sample-app:${{ github.sha }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configures AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/github-actions-role
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: github-actions-session
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build and tag Container Image
+        run: |
+          docker build \
+          -t ${{ env.CONTAINER_IMAGE }} \
+          -t ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.CONTAINER_IMAGE }} .
+
+      - name: Set image tag
+        run: |
+          cd kustomize/overlays/develop
+          kustomize edit set image ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.CONTAINER_IMAGE }}
+          cat kustomization.yaml
+
+      - name: Commit kustomization.yaml
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "github-actions"
+          git commit -a -m ${{ env.CONTAINER_IMAGE }}
+
+      - name: Push Container Image
+        run: docker push ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.CONTAINER_IMAGE }}
+
+      - name: Push git changes
+        uses: ad-m/github-push-action@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main
+          force: true
