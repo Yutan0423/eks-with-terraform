@@ -28,7 +28,7 @@ resource "aws_iam_policy" "github_actions" {
 }
 
 resource "aws_iam_role_policy_attachment" "github_actions" {
-  role       = module.iam_assumable_role_admin.iam_role_name
+  role       = aws_iam_role.github_actions.name
   policy_arn = aws_iam_policy.github_actions.arn
 }
 
