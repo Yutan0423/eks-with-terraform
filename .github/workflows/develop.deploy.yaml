@@ -57,7 +57,7 @@ jobs:
       - name: Push Container Image
         run: docker push ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.CONTAINER_IMAGE }}
 
-      - name: Push git changes
+      - name: Push commit changes
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
