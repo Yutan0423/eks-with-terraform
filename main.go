@@ -10,7 +10,7 @@ func main() {
 		res := &struct {
 			Message string `json:"message"`
 		}{
-			Message: "Status OK updated",
+			Message: "Status OK updated with github actions",
 		}
 		json.NewEncoder(w).Encode(res)
 	})
