@@ -1,6 +1,9 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - ../../base
+- ../../base
 
 namespace: develop
+images:
+- name: 205266909975.dkr.ecr.ap-northeast-1.amazonaws.com/sample-app
+  newTag: 44185dd67706b12fa058a4ae78ac9515101933d4
