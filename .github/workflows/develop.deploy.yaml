@@ -3,7 +3,7 @@ name: Develop Build and Push an Image to ECR
 on:
   push:
     branches:
-      - main
+      - develop
     paths:
       - "*.go"
       - "**/*.yaml"
@@ -61,5 +61,5 @@ jobs:
         uses: ad-m/github-push-action@v2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: main
+          branch: develop
           force: true
